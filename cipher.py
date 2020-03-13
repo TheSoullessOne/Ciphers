@@ -17,7 +17,7 @@ def main():
         
     # If cipher method is Playfair
     if(name == "PLf"):
-        cipher = Playfair()
+        cipher = PlayFair()
         cipher.setKey(key)
         
         # If ENC
