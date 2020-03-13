@@ -221,10 +221,67 @@ class Railfence(CipherInterface):                 # RFC
         self.key = key
         
     def encrypt(self, plaintext):
-        pass
+        for i in message:
+            if( i == " "):
+                message = message.replace(i, "")
         
-    def decrypt(self, ciphertext):
-        pass
+        result = ""
+        rowResult = ""
+        temp = 0
+        keyRow = 0
+        while keyRow < self.key:
+            while temp < len(message):       
+                rowResult = rowResult + message[temp]
+                temp = temp + self.key
+            keyRow = keyRow + 1
+            temp = keyRow
+            result = result + rowResult
+            rowResult = ""
+
+        return (result)
+        
+    def decrypt(self, cipherText):
+        myList = []
+        tempString = cipherText
+        index = 0
+        letterPerRow = int(len(cipherText) / self.key)
+        extraLetters = int(len(cipherText) % self.key)
+
+        #create a list of rows of letters
+        while index < self.key:
+            if extraLetters > 0:
+                myList.append(tempString[:letterPerRow + 1])
+                tempString = tempString[letterPerRow+1:]
+                extraLetters -= 1
+            else:
+                myList.append(tempString[:letterPerRow])
+                tempString = tempString[letterPerRow:]
+            index += 1
+
+        row = 0
+        col = 0
+        tempString = ""
+        result = ""
+        extraLetters = int(len(cipherText) % self.key)
+        
+        #start decrypting
+        while col < letterPerRow:
+            while row < self.key:
+                tempString = tempString + myList[row][col]
+                row += 1
+            col += 1
+            row = 0
+            result += tempString
+            tempString = ""
+            
+        #fill up with extra letters
+        if extraLetters > 0:
+            i = 0
+            while i < extraLetters:
+                result += myList[i][letterPerRow]
+                i += 1
+
+        return result
 
 class Vigenre(CipherInterface):                   # VIG
     def __init__(self):
@@ -248,7 +305,7 @@ class Caesar(CipherInterface):                    # CES
         self.key = key
         
     def encrypt(self, plaintext):
-        pass
+        
         
     def decrypt(self, ciphertext):
         pass
