@@ -305,7 +305,7 @@ class Caesar(CipherInterface):                    # CES
         self.key = key
         
     def encrypt(self, plaintext):
-        
+        pass
         
     def decrypt(self, ciphertext):
         pass
