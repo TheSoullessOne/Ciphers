@@ -305,10 +305,18 @@ class Caesar(CipherInterface):                    # CES
         self.key = key
         
     def encrypt(self, plaintext):
-        pass
+        result = ""
+        for char in plaintext:
+            result = result + chr((ord(char) + self.key - 97) % 26 + 97)
         
+        return result
+
     def decrypt(self, ciphertext):
-        pass
+        result = ""
+        for char in ciphertext:
+            result = result + chr((ord(char) + self.key + 97) % 26 - 97)
+        
+        return result
 
 ##################################### EXTRA CREDIT ########################################
 class Hill(CipherInterface):                      # HIL
