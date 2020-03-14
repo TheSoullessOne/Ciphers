@@ -53,15 +53,15 @@ def main():
         
     # If cipher method is Vigenre
     elif(name == "VIG"):
-        cipher = Vigenre()
+        cipher = Vigenere()
         cipher.setKey(key)
         
         # If ENC
         if(encOrDec == "ENC"):
-            cipher.encrypt(inputFile)
+            cipher.encrypt(inputFile, outputfile)
         # If DEC
         elif(encOrDec == "DEC"):
-            cipher.decrypt(inputFile)
+            cipher.decrypt(inputFile, outputfile)
         
     # If cipher method is Caesar
     elif(name == "CES"):
@@ -283,19 +283,71 @@ class Railfence(CipherInterface):                 # RFC
 
         return result
 
-class Vigenre(CipherInterface):                   # VIG
+class Vigenere():
+    # Mapping alphabet and letter indexes
+    alphabet = 'abcdefghijklmnopqrstuvwxyz'.upper()
+    letter_to_index = dict(zip(alphabet, range(len(alphabet))))
+    index_to_letter = dict(zip(range(len(alphabet)), alphabet))
+    
     def __init__(self):
-        CipherInterface.__init__(self)
-        print("Made a Vigenre")
+        print("Made a Vigenere")
         
     def setKey(self, key):
-        self.key = key
+        self.key = key.replace(" ", "")
         
-    def encrypt(self, plaintext):
-        pass
-        
-    def decrypt(self, ciphertext):
-        pass
+    def encrypt(self, infile, outfile):
+        # Read in the plaintext as a string and replace whitespace and newlines
+        with open(infile, 'r') as file:
+            plaintext = file.read().replace('\n', '')
+        plaintext = plaintext.replace(" ", "")
+        plaintext = plaintext.upper()
+        cipher = ''
+
+        # Checking if the key is longer than the plaintext
+        # and updating the key to match the length
+        if (len(self.key) > len(plaintext)):
+            shortened_key = ''
+            for letter in range(len(plaintext)):
+                shortened_key += self.key[letter]
+            self.key = shortened_key
+
+        # Lookup indexes and find corresponding cipher
+        index = 0
+        for letter in plaintext:
+            number = self.letter_to_index[letter] + self.letter_to_index[self.key[index % len(self.key)]]
+            cipher += self.index_to_letter[number % len(self.alphabet)]
+            index = index + 1
+
+        # Write out the file
+        outfile = open(outfile, "w")
+        outfile.write(str(cipher))
+            
+    def decrypt(self, infile, outfile):
+        # Read the ciphertext into a string while replacing all whitespace and newlines
+        with open(infile, 'r') as file:
+            ciphertext = file.read().replace('\n', '')
+        ciphertext = ciphertext.replace(" ", " ")
+        ciphertext = ciphertext.upper()
+        decrypted = ''
+
+        # Checking if the key is longer and making adjustment if needed
+        if (len(self.key) > len(ciphertext)):
+            shortened_key = ''
+            for letter in range(len(ciphertext)):
+                shortened_key += self.key[letter]
+            self.key = shortened_key
+
+
+        # Lookup indexes and find corresponding decipher
+        index = 0
+        for letter in ciphertext:
+            number = self.letter_to_index[letter] - self.letter_to_index[self.key[index % len(self.key)]]
+            decrypted = decrypted + self.index_to_letter[number % len(self.alphabet)]
+            index = index + 1
+
+        # Write out decrypted file
+        outfile = open(outfile, "w")
+        outfile.write(decrypted)
 
 class Caesar(CipherInterface):                    # CES
     def __init__(self):
