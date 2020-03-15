@@ -93,15 +93,146 @@ class PlayFair(CipherInterface):                  # PLF
     def __init__(self):
         CipherInterface.__init__(self)
         print("Made a PlayFair")
-        
-    def setKey(self, key):
+    
+    def setKey(self, key):                      #create table
         self.key = key
-        
-    def encrypt(self, plaintext):
-        pass
-        
-    def decrypt(self, ciphertext):
-        pass
+
+        table = []
+        row = []
+        index = 0
+        alphabet = "abcdefghiklmnopqrstuvwxyz"  #exclude j temporarily
+        # key = key.replace(" ", "")              # combination of alphabet and key
+        key = key + alphabet
+
+        seen = set()
+        while index < len(key):
+
+            if not key[index] in seen:
+                row.append(key[index])
+                seen.add(key[index])
+                if len(row) == 5:
+                    table.append(row)
+                    row = []
+            index += 1
+        return table
+
+    def do_pair(plainText):            #plaintext: bolloon
+        index = 0
+        pair = ""
+        result = []
+        while index < len(plainText):
+            if pair == "":
+                pair = plainText[index]
+                index += 1
+
+            elif len(pair) == 1:
+                if pair == plainText[index]:
+                    pair = pair + 'x'
+                else:
+                    pair = pair + plainText[index]
+                    index += 1
+
+            if len(pair) == 2:
+                result.append(pair)
+                pair = ""
+        if len(pair) == 1:
+            pair = pair + 'x'
+
+            result.append(pair)
+        return result
+
+    #encryption
+    def encrypt(self, inputFile, outputFile, key):
+        result =""
+        cipherText = []
+        inFile = open(inputFile, "r")
+        outFile = open(outputFile, "w")    
+        inputString = inFile.read()
+        plainText = do_pair(inputString)
+        table = setKey(key)
+
+        m = {}                                #construct coordinate table
+        for tRow in range(len(table)):
+            for tCol in range(len(table)):
+                m[table[tRow][tCol]] = tRow, tCol
+
+        for myWord in plainText:                    #each pair in the new plainText: bo
+            l1 = myWord[0]
+            l2 = myWord[1]
+
+            if l1 in m:
+                (x1, y1) = m.get(l1)
+            if l2 in m:
+                (x2, y2) = m.get(l2)
+
+            Encl1 = ""
+            Encl2 = ""
+
+            #same row
+            if x1 == x2:                          
+                Encl1 = (x1, (y1 + 1) % 5)
+                Encl2 = (x2, (y2 + 1) % 5) 
+            #same column
+            elif y1 == y2:                        
+                Encl1 = ((x1 + 1) % 5, y1)
+                Encl2 = ((x2 + 1) % 5, y2)
+            #different row and column
+            else:                                   
+                Encl1 = (x1, y2)
+                Encl2 = (x2, y1)
+
+            cipherText.append(table[Encl1[0]][Encl1[1]] + table[Encl2[0]][Encl2[1]])
+        for i in cipherText:
+            result += i
+        outFile.write(result)
+
+    #Decryption
+    def decrypt (self, inputFile, outputFile, key):
+
+        decryptResult = ""
+        inFile = open(inputFile, "r")
+        outFile = open(outputFile, "w")    
+        inputString = inFile.read()
+
+        textToDecrypt = do_pair(inputString)
+        table = setKey(key)
+
+        decryptedText = []
+        m = {}                                #construct coordinate table
+        for tRow in range(len(table)):
+            for tCol in range(len(table)):
+                m[table[tRow][tCol]] = tRow, tCol
+
+        for myWord in textToDecrypt:                    #each pair in the new plainText: bo
+            l1 = myWord[0]
+            l2 = myWord[1]
+
+            if l1 in m:
+                (x1, y1) = m.get(l1)
+            if l2 in m:
+                (x2, y2) = m.get(l2)
+
+            Encl1 = ""
+            Encl2 = ""
+
+            #same row
+            if x1 == x2:                          
+                Encl1 = (x1, y1 - 1)
+                Encl2 = (x2, y2 - 1) 
+            #same column
+            elif y1 == y2:                        
+                Encl1 = (x1 - 1, y1)
+                Encl2 = (x2 - 1, y2)
+            #different row and column
+            else:                                   
+                Encl1 = (x1, y2)
+                Encl2 = (x2, y1)
+
+            decryptedText.append(table[Encl1[0]][Encl1[1]] + table[Encl2[0]][Encl2[1]])
+
+        for i in decryptedText:
+            decryptResult += i
+        outFile.write(decryptResult)
 
 class RowTransposition(CipherInterface):          # RTS
     def __init__(self):
