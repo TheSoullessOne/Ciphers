@@ -8,24 +8,27 @@ def main():
     # print command line arguments
     #for arg in sys.argv[1:]:
     #    print(arg)
-        
+    if(len(sys.argv) < 6):
+        print("USAGE: " + sys.argv[0] + " <CIPHER> <KEY> <ENC/DEC> <INPUT FILE NAME> <OUTPUT FILE NAME>")
+        exit(1)    
+
     name = sys.argv[1]
     key = sys.argv[2]
     encOrDec = sys.argv[3]
     inputFile = sys.argv[4]
-    outputfile = sys.argv[5]
+    outputFile = sys.argv[5]
         
     # If cipher method is Playfair
-    if(name == "PLf"):
+    if(name == "PLF"):
         cipher = PlayFair()
         cipher.setKey(key)
         
         # If ENC
         if(encOrDec == "ENC"):
-            cipher.encrypt(inputFile)
+            cipher.encrypt(inputFile, outputFile, key)
         # If DEC
         elif(encOrDec == "DEC"):
-            cipher.decrypt(inputFile)
+            cipher.decrypt(inputFile, outputFile, key)
     
     # If cipher method is RowTransposition
     elif(name == "RTS"):
@@ -34,10 +37,10 @@ def main():
                 
         # If ENC
         if(encOrDec == "ENC"):
-            cipher.encrypt(inputFile, outputfile)
+            cipher.encrypt(inputFile, outputFile)
         # If DEC
         elif(encOrDec == "DEC"):
-            cipher.decrypt(inputFile, outputfile)
+            cipher.decrypt(inputFile, outputFile)
     
     # If cipher method is Railfence
     elif(name == "RFC"):
@@ -46,10 +49,10 @@ def main():
         
         # If ENC
         if(encOrDec == "ENC"):
-            cipher.encrypt(inputFile)
+            cipher.encrypt(inputFile, outputFile, key)
         # If DEC
         elif(encOrDec == "DEC"):
-            cipher.decrypt(inputFile)
+            cipher.decrypt(inputFile, outputFile, key)
         
     # If cipher method is Vigenre
     elif(name == "VIG"):
@@ -58,10 +61,10 @@ def main():
         
         # If ENC
         if(encOrDec == "ENC"):
-            cipher.encrypt(inputFile, outputfile)
+            cipher.encrypt(inputFile, outputFile)
         # If DEC
         elif(encOrDec == "DEC"):
-            cipher.decrypt(inputFile, outputfile)
+            cipher.decrypt(inputFile, outputFile)
         
     # If cipher method is Caesar
     elif(name == "CES"):
@@ -101,7 +104,8 @@ class PlayFair(CipherInterface):                  # PLF
         row = []
         index = 0
         alphabet = "abcdefghiklmnopqrstuvwxyz"  #exclude j temporarily
-        # key = key.replace(" ", "")              # combination of alphabet and key
+        key = key.replace(" ", "")              # combination of alphabet and key
+        key = key.lower()
         key = key + alphabet
 
         seen = set()
@@ -114,9 +118,9 @@ class PlayFair(CipherInterface):                  # PLF
                     table.append(row)
                     row = []
             index += 1
-        return table
+        self.table = table
 
-    def do_pair(plainText):            #plaintext: bolloon
+    def do_pair(self, plainText):            #plaintext: bolloon
         index = 0
         pair = ""
         result = []
@@ -148,13 +152,13 @@ class PlayFair(CipherInterface):                  # PLF
         inFile = open(inputFile, "r")
         outFile = open(outputFile, "w")    
         inputString = inFile.read()
-        plainText = do_pair(inputString)
-        table = setKey(key)
+        inputString = inputString.lower()
+        plainText = self.do_pair(inputString)
 
         m = {}                                #construct coordinate table
-        for tRow in range(len(table)):
-            for tCol in range(len(table)):
-                m[table[tRow][tCol]] = tRow, tCol
+        for tRow in range(len(self.table)):
+            for tCol in range(len(self.table)):
+                m[self.table[tRow][tCol]] = tRow, tCol
 
         for myWord in plainText:                    #each pair in the new plainText: bo
             l1 = myWord[0]
@@ -181,27 +185,26 @@ class PlayFair(CipherInterface):                  # PLF
                 Encl1 = (x1, y2)
                 Encl2 = (x2, y1)
 
-            cipherText.append(table[Encl1[0]][Encl1[1]] + table[Encl2[0]][Encl2[1]])
+            cipherText.append(self.table[Encl1[0]][Encl1[1]] + self.table[Encl2[0]][Encl2[1]])
         for i in cipherText:
             result += i
         outFile.write(result)
 
     #Decryption
     def decrypt (self, inputFile, outputFile, key):
-
         decryptResult = ""
         inFile = open(inputFile, "r")
         outFile = open(outputFile, "w")    
         inputString = inFile.read()
 
-        textToDecrypt = do_pair(inputString)
-        table = setKey(key)
+        textToDecrypt = self.do_pair(inputString)
+        # table = self.setKey(key)
 
         decryptedText = []
         m = {}                                #construct coordinate table
-        for tRow in range(len(table)):
-            for tCol in range(len(table)):
-                m[table[tRow][tCol]] = tRow, tCol
+        for tRow in range(len(self.table)):
+            for tCol in range(len(self.table)):
+                m[self.table[tRow][tCol]] = tRow, tCol
 
         for myWord in textToDecrypt:                    #each pair in the new plainText: bo
             l1 = myWord[0]
@@ -228,7 +231,7 @@ class PlayFair(CipherInterface):                  # PLF
                 Encl1 = (x1, y2)
                 Encl2 = (x2, y1)
 
-            decryptedText.append(table[Encl1[0]][Encl1[1]] + table[Encl2[0]][Encl2[1]])
+            decryptedText.append(self.table[Encl1[0]][Encl1[1]] + self.table[Encl2[0]][Encl2[1]])
 
         for i in decryptedText:
             decryptResult += i
@@ -351,35 +354,48 @@ class Railfence(CipherInterface):                 # RFC
     def setKey(self, key):
         self.key = key
         
-    def encrypt(self, plaintext):
-        for i in message:
-            if( i == " "):
-                message = message.replace(i, "")
-        
+    def encrypt(self, inputFile, outputFile, key):          #meetmeafterthetogaparty
+        inFile = open(inputFile, "r")
+        outFile = open(outputFile, "w")
+        keyRow = 0
+        plainText = inFile.read()
+        plainText = plainText.lower()
+
         result = ""
         rowResult = ""
         temp = 0
         keyRow = 0
-        while keyRow < self.key:
-            while temp < len(message):       
-                rowResult = rowResult + message[temp]
-                temp = temp + self.key
+
+        for i in plainText:                               #strip all spaces if present
+            if i == " ":
+                plainText = plainText.replace(i, "")
+        
+        while keyRow < int(key):
+            while temp < len(plainText):
+                rowResult = rowResult + plainText[temp]
+                temp = temp + int(key)
             keyRow = keyRow + 1
             temp = keyRow
             result = result + rowResult
             rowResult = ""
 
-        return (result)
+        outFile.write(result)
+        inFile.close()
+        outFile.close()
         
-    def decrypt(self, cipherText):
+    def decrypt(self, inputFile, outputFile, key):
+        inFile = open(inputFile, "r")
+        outFile = open(outputFile, "w")
+        plainText = inFile.read()
+
         myList = []
-        tempString = cipherText
+        tempString = plainText
         index = 0
-        letterPerRow = int(len(cipherText) / self.key)
-        extraLetters = int(len(cipherText) % self.key)
+        letterPerRow = int(len(plainText) / int(key))
+        extraLetters = int(len(plainText) % int(key))
 
         #create a list of rows of letters
-        while index < self.key:
+        while index < int(key):
             if extraLetters > 0:
                 myList.append(tempString[:letterPerRow + 1])
                 tempString = tempString[letterPerRow+1:]
@@ -393,11 +409,11 @@ class Railfence(CipherInterface):                 # RFC
         col = 0
         tempString = ""
         result = ""
-        extraLetters = int(len(cipherText) % self.key)
+        extraLetters = int(len(plainText) % int(key))
         
         #start decrypting
         while col < letterPerRow:
-            while row < self.key:
+            while row < int(key):
                 tempString = tempString + myList[row][col]
                 row += 1
             col += 1
@@ -412,7 +428,9 @@ class Railfence(CipherInterface):                 # RFC
                 result += myList[i][letterPerRow]
                 i += 1
 
-        return result
+        outFile.write(result)
+        inFile.close()
+        outFile.close()
 
 class Vigenere():
     # Mapping alphabet and letter indexes
