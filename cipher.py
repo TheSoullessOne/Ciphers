@@ -510,12 +510,15 @@ class Caesar(CipherInterface):                    # CES
             ciphertext = file.read().replace('\n', '')
 
         ciphertext = ciphertext.replace(" ", " ")
-        ciphertext = ciphertext.upper()
         result = ''
 
         for char in ciphertext:
             if char.isalpha():
-                result += chr(ord(char) + int(self.key) % 26)
+                newChar = chr(ord(char) + int(self.key))
+                while ord(newChar) > 122:
+                    newChar = chr(ord(newChar) - 26)
+                print(ord(newChar))
+                result += newChar
 
         outfile = open(outfile, "w+")
         outfile.write(result)
@@ -526,7 +529,6 @@ class Caesar(CipherInterface):                    # CES
             ciphertext = file.read().replace('\n', '')
 
         ciphertext = ciphertext.replace(" ", " ")
-        ciphertext = ciphertext.upper()
         result = ''
 
         for char in ciphertext:
