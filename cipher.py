@@ -443,6 +443,7 @@ class Vigenere():
         
     def setKey(self, key):
         self.key = key.replace(" ", "")
+        self.key = key.upper()
         
     def encrypt(self, infile, outfile):
         # Read in the plaintext as a string and replace whitespace and newlines
