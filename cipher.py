@@ -73,10 +73,10 @@ def main():
         
         # If ENC
         if(encOrDec == "ENC"):
-            cipher.encrypt(inputFile)
+            cipher.encrypt(inputFile, outputFile)
         # If DEC
         elif(encOrDec == "DEC"):
-            cipher.decrypt(inputFile)
+            cipher.decrypt(inputFile, outputFile)
 
 class CipherInterface:                          # Parent Class w/ void functions
     def __init__(self):
@@ -443,7 +443,6 @@ class Vigenere():
         
     def setKey(self, key):
         self.key = key.replace(" ", "")
-        self.key = key.upper()
         
     def encrypt(self, infile, outfile):
         # Read in the plaintext as a string and replace whitespace and newlines
@@ -506,19 +505,31 @@ class Caesar(CipherInterface):                    # CES
     def setKey(self, key):
         self.key = key
         
-    def encrypt(self, plaintext):
+    def encrypt(self, infile, outfile):
+	with open(infile, 'r') as file:
+            ciphertext = file.read().replace('\n', '')
+        ciphertext = ciphertext.replace(" ", " ")
+        ciphertext = ciphertext.upper()
         result = ""
-        for char in plaintext:
+
+        for char in ciphertext:
             result = result + chr((ord(char) + self.key - 97) % 26 + 97)
         
-        return result
+	outfile = open(outfile, "w")
+        outfile.write(result)
 
-    def decrypt(self, ciphertext):
+    def decrypt(self, infile, outfile):
+	with open(infile, 'r') as file:
+            ciphertext = file.read().replace('\n', '')
+        ciphertext = ciphertext.replace(" ", " ")
+        ciphertext = ciphertext.upper()
         result = ""
+
         for char in ciphertext:
             result = result + chr((ord(char) + self.key + 97) % 26 - 97)
         
-        return result
+        outfile = open(outfile, "w")
+        outfile.write(result)
 
 ##################################### EXTRA CREDIT ########################################
 class Hill(CipherInterface):                      # HIL
