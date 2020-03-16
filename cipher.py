@@ -506,7 +506,7 @@ class Caesar(CipherInterface):                    # CES
         self.key = key
         
     def encrypt(self, infile, outfile):
-	with open(infile, 'r') as file:
+	    with open(infile, 'r') as file:
             ciphertext = file.read().replace('\n', '')
         ciphertext = ciphertext.replace(" ", " ")
         ciphertext = ciphertext.upper()
@@ -519,7 +519,7 @@ class Caesar(CipherInterface):                    # CES
         outfile.write(result)
 
     def decrypt(self, infile, outfile):
-	with open(infile, 'r') as file:
+	    with open(infile, 'r') as file:
             ciphertext = file.read().replace('\n', '')
         ciphertext = ciphertext.replace(" ", " ")
         ciphertext = ciphertext.upper()
