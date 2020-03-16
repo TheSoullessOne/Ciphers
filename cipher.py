@@ -514,10 +514,12 @@ class Caesar(CipherInterface):                    # CES
         result = ''
 
         for char in ciphertext:
-            result = result + chr((ord(char) + self.key - 97) % 26 + 97)
-        
+            if char.isalpha():
+                result += chr(ord(char) + int(self.key) % 26)
+
         outfile = open(outfile, "w+")
         outfile.write(result)
+        outfile.close()
 
     def decrypt(self, infile, outfile):
         with open(infile, 'r') as file:
@@ -528,10 +530,12 @@ class Caesar(CipherInterface):                    # CES
         result = ''
 
         for char in ciphertext:
-            result = result + chr((ord(char) + self.key + 97) % 26 - 97)
+            if char.isalpha():
+                result += chr(ord(char) - int(self.key) % 26)
         
         outfile = open(outfile, "w+")
         outfile.write(result)
+        outfile.close()
 
 ##################################### EXTRA CREDIT ########################################
 class Hill(CipherInterface):                      # HIL
