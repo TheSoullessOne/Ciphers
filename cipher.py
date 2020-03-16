@@ -506,29 +506,31 @@ class Caesar(CipherInterface):                    # CES
         self.key = key
         
     def encrypt(self, infile, outfile):
-	    with open(infile, 'r') as file:
+        with open(infile, 'r') as file:
             ciphertext = file.read().replace('\n', '')
+
         ciphertext = ciphertext.replace(" ", " ")
         ciphertext = ciphertext.upper()
-        result = ""
+        result = ''
 
         for char in ciphertext:
             result = result + chr((ord(char) + self.key - 97) % 26 + 97)
         
-	outfile = open(outfile, "w")
+        outfile = open(outfile, "w+")
         outfile.write(result)
 
     def decrypt(self, infile, outfile):
-	    with open(infile, 'r') as file:
+        with open(infile, 'r') as file:
             ciphertext = file.read().replace('\n', '')
+
         ciphertext = ciphertext.replace(" ", " ")
         ciphertext = ciphertext.upper()
-        result = ""
+        result = ''
 
         for char in ciphertext:
             result = result + chr((ord(char) + self.key + 97) % 26 - 97)
         
-        outfile = open(outfile, "w")
+        outfile = open(outfile, "w+")
         outfile.write(result)
 
 ##################################### EXTRA CREDIT ########################################
